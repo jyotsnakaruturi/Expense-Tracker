@@ -1,7 +1,10 @@
 const express = require("express");
 const cron = require("node-cron");
+const app = express();
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
+const expenseEmail = require("./helpers/sendMail");
+const Expense = require("./models/Expense");
 
 dotenv.config();
 
@@ -11,17 +14,19 @@ mongoose.connect(process.env.DB).then(() => {
     console.log(e);
 });
 
-const app = express();
-
+ 
 // Simple route to keep server alive
 app.get("/", (req, res) => {
     res.send("Background service is running...");
 });
 
 // Example cron job that runs every minute
-cron.schedule('* * * * *', () => {
-    console.log('Running a task every minute');
-});
+const run=()=>{
+    cron.schedule('* * * * *', () => {
+        expenseEmail()
+    });
+};
+run();
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);
